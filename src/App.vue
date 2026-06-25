@@ -1,17 +1,19 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, computed } from 'vue'
-import { useBrowserTabs } from './composables/useBrowserTabs'
-import BrowserBar from './components/BrowserBar.vue'
-import TabBar from './components/TabBar.vue'
-import ConsolePanel from './components/ConsolePanel.vue'
-import NetworkPanel from './components/NetworkPanel.vue'
-import InspectorPanel from './components/InspectorPanel.vue'
-import CookiePanel from './components/CookiePanel.vue'
+import { ref, onMounted, onUnmounted, computed } from "vue";
+import { useBrowserTabs } from "./composables/useBrowserTabs";
+import BrowserBar from "./components/BrowserBar.vue";
+import TabBar from "./components/TabBar.vue";
+import ConsolePanel from "./components/ConsolePanel.vue";
+import NetworkPanel from "./components/NetworkPanel.vue";
+import InspectorPanel from "./components/InspectorPanel.vue";
+import CookiePanel from "./components/CookiePanel.vue";
 
-const webviewContainer = ref<HTMLElement | null>(null)
-const devtoolsTab = ref<'console' | 'network' | 'inspector' | 'cookies'>('console')
-const sidebarWidth = ref(380)
-const sidebarVisible = ref(true)
+const webviewContainer = ref<HTMLElement | null>(null);
+const devtoolsTab = ref<"console" | "network" | "inspector" | "cookies">(
+  "console",
+);
+const sidebarWidth = ref(380);
+const sidebarVisible = ref(true);
 
 const {
   tabs,
@@ -27,78 +29,78 @@ const {
   reload,
   captureScreenshot,
   closeAll,
-} = useBrowserTabs(webviewContainer)
+} = useBrowserTabs(webviewContainer);
 
 // URL shown in the address bar — reflects the active tab
-const addressUrl = computed(() => activeTab.value?.url ?? '')
+const addressUrl = computed(() => activeTab.value?.url ?? "");
 
 // ── Navigation from BrowserBar ──
 async function onNavigate(url: string) {
-  await navigate(url)
+  await navigate(url);
 }
 
 // ── New tab button ──
 async function onNewTab() {
-  await createTab('about:blank')
+  await createTab("about:blank");
 }
 
 // ── Screenshot ──
 async function onScreenshot() {
-  const dataUrl = await captureScreenshot()
+  const dataUrl = await captureScreenshot();
   if (dataUrl) {
-    const link = document.createElement('a')
-    link.href = dataUrl
-    link.download = `screenshot-${Date.now()}.png`
-    link.click()
+    const link = document.createElement("a");
+    link.href = dataUrl;
+    link.download = `screenshot-${Date.now()}.png`;
+    link.click();
   }
 }
 
 function toggleSidebar() {
-  sidebarVisible.value = !sidebarVisible.value
+  sidebarVisible.value = !sidebarVisible.value;
 }
 
 function startResize(e: MouseEvent) {
-  e.preventDefault()
-  const startX = e.clientX
-  const startWidth = sidebarWidth.value
+  e.preventDefault();
+  const startX = e.clientX;
+  const startWidth = sidebarWidth.value;
 
   const onMove = (moveEvent: MouseEvent) => {
-    const delta = startX - moveEvent.clientX
-    sidebarWidth.value = Math.max(250, Math.min(600, startWidth + delta))
-  }
+    const delta = startX - moveEvent.clientX;
+    sidebarWidth.value = Math.max(250, Math.min(600, startWidth + delta));
+  };
 
   const onUp = () => {
-    document.removeEventListener('mousemove', onMove)
-    document.removeEventListener('mouseup', onUp)
-  }
+    document.removeEventListener("mousemove", onMove);
+    document.removeEventListener("mouseup", onUp);
+  };
 
-  document.addEventListener('mousemove', onMove)
-  document.addEventListener('mouseup', onUp)
+  document.addEventListener("mousemove", onMove);
+  document.addEventListener("mouseup", onUp);
 }
 
 // Keyboard shortcuts: Ctrl+T = new tab, Ctrl+W = close tab
 function onKeydown(e: KeyboardEvent) {
-  if ((e.ctrlKey || e.metaKey) && e.key === 't') {
-    e.preventDefault()
-    onNewTab()
-  } else if ((e.ctrlKey || e.metaKey) && e.key === 'w') {
-    e.preventDefault()
+  if ((e.ctrlKey || e.metaKey) && e.key === "t") {
+    e.preventDefault();
+    onNewTab();
+  } else if ((e.ctrlKey || e.metaKey) && e.key === "w") {
+    e.preventDefault();
     if (activeTabId.value) {
-      closeTab(activeTabId.value)
+      closeTab(activeTabId.value);
     }
   }
 }
 
 onMounted(() => {
   // Open a default page on launch
-  createTab('https://www.bing.com')
-  document.addEventListener('keydown', onKeydown)
-})
+  createTab("https://www.bing.com");
+  document.addEventListener("keydown", onKeydown);
+});
 
 onUnmounted(() => {
-  document.removeEventListener('keydown', onKeydown)
-  closeAll()
-})
+  document.removeEventListener("keydown", onKeydown);
+  closeAll();
+});
 </script>
 
 <template>
